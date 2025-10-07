@@ -1,0 +1,21 @@
+#required modules
+#Module 1 required packages
+os
+fitz
+docx
+
+#Module 1 required packages
+nltk
+spacy
+
+#Module 3 required packages
+numpy
+transformers
+torch
+
+#Module 4 required packages
+difflib
+
+#Module 5 required packages
+transformers
+nltk
