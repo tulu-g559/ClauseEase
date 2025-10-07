@@ -14,7 +14,7 @@ PASSWORD = "1234"
 
 def login_page():
     """Login UI"""
-    st.title("🔐 ClauseEase Login")
+    st.title("ClauseEase Login")
     st.markdown("Please enter your credentials to continue.")
 
     username = st.text_input("Username")
@@ -37,7 +37,7 @@ def logout_button():
 # ------------------------ MAIN CLAUSEEASE APP ------------------------
 def main_app():
     """Main ClauseEase workflow"""
-    st.title("📝 ClauseEase: Legal Clause Analyzer & Simplifier")
+    st.title("ClauseEase: Legal Clause Analyzer & Simplifier")
     st.markdown("Automatically analyzes a preloaded contract, detects clause types, recognizes legal terms, and simplifies language.")
 
     logout_button()
@@ -51,26 +51,26 @@ def main_app():
     if contract_text.startswith("[ERROR]"):
         st.error(contract_text)
         return
-    st.success("✅ Text extraction complete!")
+    st.success("Text extraction complete!")
 
-    with st.expander("📄 Extracted Text"):
+    with st.expander("Extracted Text"):
         st.write(contract_text)
 
     # Step 2: Preprocessing
     with st.spinner("Preprocessing text into clauses..."):
         processed_clauses = preprocess_contract_text(contract_text)
-    st.success("✅ Preprocessing complete!")
+    st.success("Preprocessing complete!")
 
-    with st.expander("✂️ Preprocessed Clauses"):
+    with st.expander("Preprocessed Clauses"):
         for i, clause in enumerate(processed_clauses[:5]):
             st.write(f"Clause {i+1}: {clause['cleaned_text']}")
 
     # Step 3: Legal Clause Detection
     with st.spinner("Detecting clause types..."):
         clause_types = [detect_clause_type(clause["cleaned_text"]) for clause in processed_clauses]
-    st.success("✅ Clause detection complete!")
+    st.success("Clause detection complete!")
 
-    with st.expander("⚖️ Legal Clause Detection"):
+    with st.expander("Legal Clause Detection"):
         for i, (clause, ctype) in enumerate(zip(processed_clauses, clause_types)):
             st.write(f"Clause {i+1}: **{ctype}**")
             st.write(clause["cleaned_text"])
@@ -79,9 +79,9 @@ def main_app():
     # Step 4: Legal Term Recognition
     with st.spinner("Recognizing legal terms..."):
         clause_terms = [recognize_legal_terms(clause["cleaned_text"], legal_terms) for clause in processed_clauses]
-    st.success("✅ Legal term recognition complete!")
+    st.success("Legal term recognition complete!")
 
-    with st.expander("🔹 Legal Terms Found"):
+    with st.expander("Legal Terms Found"):
         for i, terms in enumerate(clause_terms):
             st.write(f"Clause {i+1}:")
             if terms:
@@ -94,9 +94,9 @@ def main_app():
     # Step 5: Language Simplification
     with st.spinner("Simplifying clauses..."):
         simplified_clauses = [simplify_text(clause["cleaned_text"]) for clause in processed_clauses]
-    st.success("✅ Language simplification complete!")
+    st.success("Language simplification complete!")
 
-    with st.expander("📝 Simplified Clauses"):
+    with st.expander("Simplified Clauses"):
         for i, simplified in enumerate(simplified_clauses):
             st.write(f"Clause {i+1}:")
             st.write(simplified)
