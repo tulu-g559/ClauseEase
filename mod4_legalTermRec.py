@@ -1,71 +1,51 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
-import numpy as np
-from mod1_docingestion import extract_text
-from mod2_preprocess import preprocess_contract_text
+import re
 
-# Load Pretrained Legal-BERT Model
-
-model_name = "nlpaueb/legal-bert-base-uncased"
-
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=5)
-
-
-# Define Clause Categories
-clause_labels = {
-    0: "Confidentiality",
-    1: "Termination",
-    2: "Indemnity",
-    3: "Dispute Resolution",
-    4: "Governing Law"
+# -----------------------------------------------------------
+# Custom Legal Term Dictionary
+# -----------------------------------------------------------
+legal_terms = {
+    "indemnity": "Security or protection against a loss or other financial burden.",
+    "arbitration": "A method of resolving disputes outside the courts.",
+    "force majeure": "Unforeseeable circumstances that prevent someone from fulfilling a contract.",
+    "breach": "A violation of a law, duty, or other form of obligation.",
+    "jurisdiction": "The official power to make legal decisions and judgments.",
+    "confidentiality": "The obligation to keep certain information private or secret.",
+    "termination": "The act of ending a contract or agreement.",
+    "governing law": "The legal jurisdiction whose laws will apply to the agreement.",
+    "liability": "Legal responsibility for one’s acts or omissions.",
+    "warranty": "A promise or assurance regarding the condition or performance of something."
 }
 
 # -----------------------------------------------------------
-# Function: Detect Clause Type
+# Function: Recognize Legal Terms in Text
 # -----------------------------------------------------------
-def detect_clause_type(text: str) -> str:
+def recognize_legal_terms(text: str, term_dict: dict):
     """
-    Predict the clause type for a given piece of text using Legal-BERT.
+    Identify legal terms present in the given text based on the custom dictionary.
+    Returns a dictionary of recognized terms and their definitions.
     """
-    if not text.strip():
-        return "Unknown"
-
-    # Tokenize the input text
-    inputs = tokenizer(
-        text,
-        return_tensors="pt",
-        truncation=True,
-        padding=True
-    )
-
-    # Forward pass through the model
-    with torch.no_grad():
-        outputs = model(**inputs)
-
-    logits = outputs.logits
-    predicted_class = torch.argmax(logits, dim=1).item()
-
-    return clause_labels.get(predicted_class, "Unknown")
+    found_terms = {}
+    for term in term_dict:
+        if re.search(r'\b' + re.escape(term) + r'\b', text.lower()):
+            found_terms[term] = term_dict[term]
+    return found_terms
 
 
 # -----------------------------------------------------------
-# Example Usage – Integrate with previous modules
+# Example Usage
 # -----------------------------------------------------------
 if __name__ == "__main__":
-    # Step 1 – Extract raw text from PDF/DOCX using Module 1
-    contract_file = r"d:\Internships\Infosys SpringBoard\ClauseEase\employment_agreement.pdf"
-    contract_text = extract_text(contract_file)
+    contract_text = """
+    This Agreement shall be governed by the laws of India. 
+    Any dispute arising under this Agreement shall be resolved by arbitration. 
+    The Company shall not be liable for breach of confidentiality or warranty.
+    """
 
-    if contract_text.startswith("[ERROR]"):
-        print(contract_text)
+    recognized = recognize_legal_terms(contract_text, legal_terms)
+
+    print("✅ Recognized Legal Terms:\n")
+    if recognized:
+        for term, definition in recognized.items():
+            print(f"🔹 {term}: {definition}")
     else:
-        # Step 2 – Preprocess text into clauses using Module 2
-        processed_clauses = preprocess_contract_text(contract_text)
-
-        # Step 3 – Run clause detection on each clause
-        print("✅ Running Legal Clause Detection...\n")
-        for i, clause in enumerate(processed_clauses[:5]):  # limit output to first 5 clauses
-            clause_text = clause["cleaned_text"]
-            detected_type = detect_clause_type(clause_text)
-            print(f"Clause {i+1}: {detected_type}\n{clause_text}\n{'-'*80}")
+        print("No legal terms recognized.")
